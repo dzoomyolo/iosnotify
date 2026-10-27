@@ -2,6 +2,8 @@
 
 Android reads selected notifications, incoming SMS, and calls, then sends them to your server. The server shows each event on the site right away and sends a Web Push to iPhone when the site is added to the Home Screen.
 
+The current version lives in `VERSION` (now `1.1.0`). Android (`versionName`) and the server/site read it too. On release, update that file and the nearby `server/VERSION` / `package.json` values.
+
 ## Server and site
 
 ### Local
@@ -155,5 +157,7 @@ In the app, enter the IP or URL first. Check verifies that the host responds and
 5. Send a test event. It should show up on the site.
 
 While the relay is running, the status bar shows a keeper notification. SMS and calls have their own toggles and do not depend on the app list. Notifications are forwarded only for selected apps. The app does not need to be the default SMS app. The call number is available only if call-log permission is granted; otherwise the site shows a hidden number.
+
+If the server is unreachable, events are stored in a local on-device queue (up to 500) and are sent automatically when the network returns, after app restart, or when you open the screen. The test button is not queued, so a dead server stays visible immediately.
 
 If the system force-stops the app, background receivers stay silent until you open IOSnotify again.

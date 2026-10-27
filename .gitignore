@@ -12,3 +12,4 @@ mobile/android/build/
 mobile/ios/Pods/
 *.log
 .DS_Store
+build.txt

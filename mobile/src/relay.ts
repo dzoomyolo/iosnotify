@@ -20,9 +20,16 @@ export type PermissionState = {
   notifications: boolean;
   listener: boolean;
   batteryIgnored: boolean;
+  queuedEvents: number;
+};
+
+export type AppVersion = {
+  version: string;
+  versionCode: number;
 };
 
 type RelayNative = {
+  getAppVersion: () => Promise<AppVersion>;
   getInstalledApps: () => Promise<InstalledApp[]>;
   getSettings: () => Promise<RelaySettings>;
   saveSettings: (settings: RelaySettings) => Promise<string>;
@@ -32,6 +39,7 @@ type RelayNative = {
   openAppSettings: () => void;
   sendTest: () => Promise<boolean>;
   startKeeper: () => void;
+  flushQueue: () => void;
 };
 
 export const relay = NativeModules.Relay as RelayNative | undefined;

@@ -10,6 +10,28 @@ const publicDir = path.join(__dirname, '..', 'public');
 // Apple отклоняет JWT, если subject вида mailto:...@localhost.
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:iosnotify@example.com';
 
+function readVersion() {
+  const candidates = [
+    path.join(__dirname, '..', '..', 'VERSION'),
+    path.join(__dirname, '..', 'VERSION'),
+    path.join(__dirname, '..', 'package.json'),
+  ];
+  for (const file of candidates) {
+    try {
+      const raw = require('fs').readFileSync(file, 'utf8').trim();
+      if (file.endsWith('package.json')) {
+        return JSON.parse(raw).version || '0.0.0';
+      }
+      if (raw) return raw.split(/\r?\n/)[0].trim();
+    } catch {
+      // пробуем следующий путь
+    }
+  }
+  return '0.0.0';
+}
+
+const APP_VERSION = readVersion();
+
 function randomKey() {
   return crypto.randomBytes(24).toString('base64url');
 }
@@ -161,6 +183,7 @@ app.get('/api/health', (_req, res) => {
     ok: true,
     service: 'iosnotify',
     protocol: 1,
+    version: APP_VERSION,
     instanceId: config.instanceId,
   });
 });
@@ -170,8 +193,16 @@ app.get('/api/session', requireKey, (_req, res) => {
     ok: true,
     service: 'iosnotify',
     protocol: 1,
+    version: APP_VERSION,
     instanceId: config.instanceId,
   });
+});
+
+app.get('/version.js', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.type('application/javascript').send(
+    `window.IOSNOTIFY_VERSION=${JSON.stringify(APP_VERSION)};\n`,
+  );
 });
 
 app.get('/api/config', requireKey, (_req, res) => {
@@ -272,7 +303,12 @@ app.delete('/api/push/subscribe', requireKey, (req, res) => {
 
 ensureIcons(publicDir);
 app.use((req, res, next) => {
-  if (req.path === '/sw.js' || req.path === '/app.js' || req.path === '/manifest.json') {
+  if (
+    req.path === '/sw.js'
+    || req.path === '/app.js'
+    || req.path === '/version.js'
+    || req.path === '/manifest.json'
+  ) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   }
   next();
@@ -280,7 +316,7 @@ app.use((req, res, next) => {
 app.use(express.static(publicDir, { index: 'index.html' }));
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`IOSnotify слушает http://0.0.0.0:${PORT}`);
+  console.log(`IOSnotify ${APP_VERSION} слушает http://0.0.0.0:${PORT}`);
   console.log(`Ключ доступа: ${config.apiKey}`);
   console.log(`VAPID subject: ${VAPID_SUBJECT}`);
   console.log(`Время контейнера: ${new Date().toISOString()}`);

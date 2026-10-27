@@ -26,6 +26,7 @@ const emptyPerms: PermissionState = {
   notifications: false,
   listener: false,
   batteryIgnored: false,
+  queuedEvents: 0,
 };
 
 function messageOf(error: unknown) {
@@ -53,6 +54,7 @@ function Screen() {
   const [perms, setPerms] = useState<PermissionState>(emptyPerms);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState(relay ? 'Загрузка' : 'Модуль Relay недоступен');
+  const [appVersion, setAppVersion] = useState('');
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [verifiedUrl, setVerifiedUrl] = useState('');
@@ -110,14 +112,16 @@ function Screen() {
     (async () => {
       if (!relay) return;
       try {
-        const [settings, installed, permissions] = await Promise.all([
+        const [settings, installed, permissions, versionInfo] = await Promise.all([
           relay.getSettings(),
           relay.getInstalledApps(),
           relay.getPermissionState(),
+          relay.getAppVersion(),
         ]);
         if (!alive) return;
         draft.current = settings;
         readyRef.current = true;
+        setAppVersion(versionInfo.version);
         setBaseUrl(settings.baseUrl);
         setApiKey(settings.apiKey);
         setForwardNotifications(settings.forwardNotifications);
@@ -160,7 +164,10 @@ function Screen() {
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', state => {
-      if (state === 'active') refreshPermissions();
+      if (state === 'active') {
+        relay?.flushQueue();
+        refreshPermissions();
+      }
     });
     return () => sub.remove();
   }, [refreshPermissions]);
@@ -307,7 +314,13 @@ function Screen() {
       ListHeaderComponent={
         <View>
           <Text style={styles.title}>IOSnotify</Text>
+          {appVersion ? <Text style={styles.version}>v{appVersion}</Text> : null}
           <Text style={styles.status}>{status}</Text>
+          {perms.queuedEvents > 0 ? (
+            <Text style={styles.hint}>
+              В очереди {perms.queuedEvents} событий, уйдут когда сервер снова ответит
+            </Text>
+          ) : null}
 
           {authorized ? (
             <View style={styles.access}>
@@ -552,6 +565,7 @@ function Toggle({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#0b1220' },
   title: { color: '#e8eefc', fontSize: 28, fontWeight: '700' },
+  version: { color: '#66738d', marginTop: 2, fontSize: 12 },
   status: { color: '#93a0bd', marginTop: 4, marginBottom: 16 },
   label: { color: '#93a0bd', marginBottom: 6, marginTop: 8 },
   hint: { color: '#66738d', marginTop: 6, marginBottom: 4 },

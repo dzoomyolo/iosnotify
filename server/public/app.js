@@ -1,11 +1,25 @@
 const KEY_STORAGE = 'iosnotify-api-key';
 
 const statusEl = document.querySelector('#status');
+const versionEl = document.querySelector('#app-version');
 const feedEl = document.querySelector('#feed');
 const hintEl = document.querySelector('#ios-hint');
 const dialogEl = document.querySelector('#settings');
 const keyInput = document.querySelector('#api-key');
 const pushStateEl = document.querySelector('#push-state');
+
+function setVersionLabel(value) {
+  if (!versionEl) return;
+  versionEl.textContent = value ? `v${value}` : '';
+}
+
+setVersionLabel(window.IOSNOTIFY_VERSION || '');
+fetch('/api/health')
+  .then((response) => response.json())
+  .then((data) => {
+    if (data && data.version) setVersionLabel(data.version);
+  })
+  .catch(() => {});
 
 let filter = 'all';
 let events = [];
