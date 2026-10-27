@@ -1,0 +1,24 @@
+services:
+  iosnotify:
+    build: .
+    container_name: iosnotify
+    restart: unless-stopped
+    environment:
+      PORT: "8787"
+      # Раскомментируйте, если хотите зафиксировать ключ сами.
+      # Иначе ключ создастся при первом старте и останется в томе data.
+      # API_KEY: "ваш-ключ"
+    volumes:
+      - ./data:/app/data
+    # Для NPM на той же Docker-сети порт наружу не обязателен.
+    # Раскомментируйте, если хотите зайти по http://IP:8787 из локальной сети.
+    # ports:
+    #   - "8787:8787"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    # Если у NPM уже есть своя сеть, укажите её имя и external: true
+    # name: proxynet
+    # external: true

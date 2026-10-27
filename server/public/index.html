@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IOSnotify">
+  <title>IOSnotify</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div>
+        <h1>IOSnotify</h1>
+        <p id="status" class="status">Нет ключа</p>
+      </div>
+      <button id="settings-btn" type="button" aria-label="Настройки">Настройки</button>
+    </header>
+
+    <section id="ios-hint" class="hint hidden">
+      На iPhone откройте «Поделиться» и выберите «На экран Домой». Пуш приходит только у иконки с домашнего экрана и только если сайт открыт по HTTPS.
+    </section>
+
+    <div class="filters" role="tablist">
+      <button type="button" class="chip active" data-filter="all">Все</button>
+      <button type="button" class="chip" data-filter="notification">Приложения</button>
+      <button type="button" class="chip" data-filter="sms">SMS</button>
+      <button type="button" class="chip" data-filter="call">Звонки</button>
+    </div>
+
+    <section id="feed" class="feed"></section>
+  </main>
+
+  <dialog id="settings">
+    <form method="dialog" id="settings-form">
+      <h2>Подключение</h2>
+      <label>
+        Ключ с сервера
+        <input id="api-key" autocomplete="off" spellcheck="false" placeholder="Вставьте ключ из консоли сервера">
+      </label>
+      <p id="push-state" class="hint-inline">Уведомления выключены</p>
+      <div class="row">
+        <button id="save-key" type="button" class="primary">Сохранить</button>
+        <button id="enable-push" type="button">Включить пуш</button>
+      </div>
+      <button id="test-push" type="button" class="ghost">Отправить тест пуша</button>
+      <button type="submit" class="ghost">Закрыть</button>
+    </form>
+  </dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>

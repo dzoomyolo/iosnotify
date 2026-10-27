@@ -1,0 +1,14 @@
+node_modules/
+.tools/
+server/data/
+.env
+.env.*
+*.pem
+*.p12
+*.jks
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+mobile/ios/Pods/
+*.log
+.DS_Store
